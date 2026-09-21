@@ -1,0 +1,936 @@
+/* ==============================
+   GLOBAL
+================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+
+/* ==============================
+   MAIN BACKGROUND
+================================ */
+
+main {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 30px 15px 50px;
+
+  background: linear-gradient(
+    135deg,
+    #9e6257 0%,
+    #c97862 45%,
+    #9a7183 100%
+  );
+}
+
+
+/* ==============================
+   OUTER GAME FRAME
+================================ */
+
+.card-window {
+  width: 100%;
+  max-width: 650px;
+
+  background: #0c202b;
+
+  padding: 14px;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.25),
+    0 5px 15px rgba(0, 0, 0, 0.15);
+
+  position: relative;
+}
+
+
+/* ==============================
+   MAIN GAME CARD
+================================ */
+
+.card-content {
+  width: 100%;
+  min-height: 680px;
+
+  background: #e8dddd;
+
+  border-radius: 12px;
+
+  padding: 28px 30px 30px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  color: #222;
+}
+
+
+/* ==============================
+   TITLE
+================================ */
+
+.title {
+  margin: 0;
+
+  font-size: 42px;
+  font-weight: 800;
+
+  letter-spacing: 2px;
+
+  color: #0c202b;
+
+  text-align: center;
+}
+
+.instructions {
+  margin: 8px 0 20px;
+
+  max-width: 480px;
+
+  text-align: center;
+
+  font-size: 14px;
+  line-height: 1.5;
+
+  color: #666;
+}
+
+
+/* ==============================
+   TIMER + ROLLS
+================================ */
+
+.game-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 15px;
+
+  margin-bottom: 24px;
+
+  width: 100%;
+}
+
+.game-info > div {
+  min-width: 125px;
+
+  padding: 10px 18px;
+
+  background: rgba(255, 255, 255, 0.75);
+
+  border-radius: 10px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  color: #555;
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.game-info strong {
+  display: block;
+
+  margin-top: 3px;
+
+  font-size: 21px;
+
+  color: #111;
+}
+
+
+/* ==============================
+   DICE AREA
+================================ */
+
+.dice-container {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns: repeat(5, 60px);
+
+  gap: 16px;
+
+  justify-content: center;
+
+  margin-bottom: 25px;
+}
+
+
+/* ==============================
+   DICE
+================================ */
+
+.die {
+  width: 60px;
+  height: 60px;
+
+  padding: 5px;
+
+  background-color: white;
+
+  border: none;
+
+  border-radius: 11px;
+
+  box-shadow:
+    0 4px 7px rgba(0, 0, 0, 0.15);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.die:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 7px 12px rgba(0, 0, 0, 0.18);
+}
+
+.die:active {
+  transform: scale(0.95);
+}
+
+
+/* ==============================
+   HELD DICE
+================================ */
+
+.die.held {
+  border: 3px solid #2f9e5b;
+
+  box-shadow:
+    0 4px 8px rgba(47, 158, 91, 0.25);
+}
+
+
+/* ==============================
+   SELECTED DICE
+================================ */
+
+.die.selected {
+  outline: 4px solid #ff0033;
+  outline-offset: 3px;
+}
+
+
+/* ==============================
+   DICE ROLL ANIMATION
+================================ */
+
+.die.rolling {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-10deg);
+  }
+
+  50% {
+    transform: rotate(10deg);
+  }
+
+  75% {
+    transform: rotate(-10deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+
+/* ==============================
+   REAL DICE PIPS
+================================ */
+
+.pips {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+
+  align-items: center;
+  justify-items: center;
+}
+
+.pip {
+  width: 10px;
+  height: 10px;
+
+  background-color: #111;
+
+  border-radius: 50%;
+}
+
+
+/* ==============================
+   PIP POSITIONS
+================================ */
+
+.pips-1 .pip {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+
+/* 2 */
+
+.pips-2 .pip:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pips-2 .pip:nth-child(2) {
+  grid-column: 3;
+  grid-row: 3;
+}
+
+
+/* 3 */
+
+.pips-3 .pip:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pips-3 .pip:nth-child(2) {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.pips-3 .pip:nth-child(3) {
+  grid-column: 3;
+  grid-row: 3;
+}
+
+
+/* 4 */
+
+.pips-4 .pip:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pips-4 .pip:nth-child(2) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.pips-4 .pip:nth-child(3) {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.pips-4 .pip:nth-child(4) {
+  grid-column: 3;
+  grid-row: 3;
+}
+
+
+/* 5 */
+
+.pips-5 .pip:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pips-5 .pip:nth-child(2) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.pips-5 .pip:nth-child(3) {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.pips-5 .pip:nth-child(4) {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.pips-5 .pip:nth-child(5) {
+  grid-column: 3;
+  grid-row: 3;
+}
+
+
+/* 6 */
+
+.pips-6 .pip:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pips-6 .pip:nth-child(2) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.pips-6 .pip:nth-child(3) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.pips-6 .pip:nth-child(4) {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.pips-6 .pip:nth-child(5) {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.pips-6 .pip:nth-child(6) {
+  grid-column: 3;
+  grid-row: 3;
+}
+
+
+/* ==============================
+   ROLL BUTTON
+================================ */
+
+.roll-dice {
+  grid-column: 1 / -1;
+
+  justify-self: center;
+
+  width: 125px;
+  height: 48px;
+
+  margin-top: 5px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #5035ff;
+
+  color: white;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  font-size: 18px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 10px rgba(80, 53, 255, 0.25);
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.roll-dice:hover {
+  background: #3d24e8;
+
+  transform: translateY(-2px);
+}
+
+.roll-dice:active {
+  transform: scale(0.96);
+}
+
+
+/* ==============================
+   WIN MESSAGE
+================================ */
+
+.win-message {
+  width: 100%;
+  max-width: 430px;
+
+  margin-bottom: 18px;
+
+  padding: 13px 20px;
+
+  border-radius: 12px;
+
+  background: #59e391;
+
+  color: #123;
+
+  text-align: center;
+
+  box-shadow:
+    0 5px 12px rgba(0, 0, 0, 0.12);
+
+  animation: winPop 0.4s ease-out;
+}
+
+.win-message h2 {
+  margin: 0 0 5px;
+
+  font-size: 23px;
+}
+
+.win-message p {
+  margin: 0;
+
+  font-size: 14px;
+}
+
+@keyframes winPop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+/* ==============================
+   BEST SCORE
+================================ */
+
+.best-score {
+  width: 100%;
+  max-width: 300px;
+
+  margin: 0 0 14px;
+
+  padding: 11px 16px;
+
+  background: white;
+
+  border-radius: 10px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  color: #555;
+
+  box-shadow:
+    0 3px 7px rgba(0, 0, 0, 0.1);
+}
+
+.best-score p {
+  margin: 0;
+}
+
+.best-score strong {
+  color: #111;
+
+  font-size: 18px;
+}
+
+
+/* ==============================
+   GAME STATISTICS
+================================ */
+
+.game-stats {
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+
+  gap: 35px;
+
+  margin-bottom: 15px;
+
+  font-size: 14px;
+
+  color: #555;
+}
+
+.game-stats p {
+  margin: 0;
+}
+
+.game-stats strong {
+  color: #111;
+
+  font-size: 17px;
+}
+
+
+/* ==============================
+   DIFFICULTY
+================================ */
+
+.difficulty {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-bottom: 14px;
+}
+
+.difficulty button {
+  padding: 8px 16px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: white;
+
+  color: #333;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.1);
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.difficulty button:hover {
+  background: #eeeeee;
+
+  transform: translateY(-2px);
+}
+
+
+/* ==============================
+   THEME BUTTON
+================================ */
+
+.theme-button {
+  margin-bottom: 12px;
+
+  padding: 8px 16px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #0c202b;
+
+  color: white;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: transform 0.15s ease;
+}
+
+.theme-button:hover {
+  transform: translateY(-2px);
+}
+
+
+/* ==============================
+   RESET STATISTICS
+================================ */
+
+.reset-stats {
+  padding: 7px 14px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #e74c3c;
+
+  color: white;
+
+  font-family: Arial, Helvetica, sans-serif;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.reset-stats:hover {
+  background: #c0392b;
+
+  transform: translateY(-2px);
+}
+
+
+/* ==============================
+   KEYBOARD HELP
+================================ */
+
+.keyboard-help {
+  margin: 0 0 12px;
+
+  text-align: center;
+
+  font-size: 13px;
+
+  color: #666;
+}
+
+
+/* ==============================
+   ACCESSIBILITY FOCUS
+================================ */
+
+button:focus-visible {
+  outline: 3px solid #ff0033;
+
+  outline-offset: 3px;
+}
+
+
+/* ==============================
+   SCREEN READER ONLY
+================================ */
+
+.sr-only {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+
+  padding: 0;
+  margin: -1px;
+
+  overflow: hidden;
+
+  clip: rect(0, 0, 0, 0);
+
+  white-space: nowrap;
+
+  border: 0;
+}
+
+
+/* ==============================
+   DARK MODE
+================================ */
+
+.card-content.dark {
+  background: #1b2025;
+
+  color: white;
+}
+
+.card-content.dark .title {
+  color: white;
+}
+
+.card-content.dark .instructions {
+  color: #bfc5ca;
+}
+
+.card-content.dark .game-info > div {
+  background: #292f35;
+
+  color: #ccc;
+}
+
+.card-content.dark .game-info strong {
+  color: white;
+}
+
+.card-content.dark .best-score {
+  background: #292f35;
+
+  color: #ccc;
+}
+
+.card-content.dark .best-score strong {
+  color: white;
+}
+
+.card-content.dark .game-stats {
+  color: #ccc;
+}
+
+.card-content.dark .game-stats strong {
+  color: white;
+}
+
+.card-content.dark .difficulty button {
+  background: #30363b;
+
+  color: white;
+}
+
+.card-content.dark .difficulty button:hover {
+  background: #3b4248;
+}
+
+.card-content.dark .theme-button {
+  background: #f1f1f1;
+
+  color: #111;
+}
+
+.card-content.dark .keyboard-help {
+  color: #aaa;
+}
+
+
+/* ==============================
+   MOBILE
+================================ */
+
+@media (max-width: 600px) {
+
+  main {
+    padding: 15px 8px 30px;
+  }
+
+  .card-window {
+    padding: 10px;
+
+    border-radius: 14px;
+  }
+
+  .card-content {
+    padding: 22px 12px 25px;
+
+    min-height: 650px;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .instructions {
+    font-size: 13px;
+
+    margin-bottom: 16px;
+  }
+
+  .game-info {
+    gap: 8px;
+  }
+
+  .game-info > div {
+    min-width: 105px;
+
+    padding: 8px 10px;
+  }
+
+  .dice-container {
+    grid-template-columns: repeat(5, 52px);
+
+    gap: 10px;
+  }
+
+  .die {
+    width: 52px;
+    height: 52px;
+  }
+
+  .pip {
+    width: 8px;
+    height: 8px;
+  }
+
+  .game-stats {
+    gap: 20px;
+  }
+}
+
+
+/* ==============================
+   VERY SMALL SCREENS
+================================ */
+
+@media (max-width: 390px) {
+
+  .dice-container {
+    grid-template-columns: repeat(5, 45px);
+
+    gap: 7px;
+  }
+
+  .die {
+    width: 45px;
+    height: 45px;
+  }
+
+  .pip {
+    width: 7px;
+    height: 7px;
+  }
+
+  .title {
+    font-size: 30px;
+  }
+
+  .difficulty button {
+    padding: 7px 11px;
+  }
+}
+
+
+/* ==============================
+   BOTTOM ACCENT
+================================ */
+
+main::after {
+  content: "";
+
+  position: fixed;
+
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+
+  height: 4px;
+
+  background: #ff0033;
+}
