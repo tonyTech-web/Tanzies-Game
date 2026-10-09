@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import Navbar from "./Navbar";
 import Die from "./Die";
 import { nanoid } from "nanoid";
 import Confetti from "react-confetti";
@@ -216,69 +217,57 @@ const MainComponent = () => {
   // Win logic
   // -----------------------------
 
-  useEffect(() => {
+  
+useEffect(() => {
+  if (gameWon && !gameWonBefore.current) {
+    gameWonBefore.current = true;
 
-    if (gameWon && !gameWonBefore.current) {
+    setTimerRunning(false);
 
-      setTimerRunning(false);
+    winAudio.current.currentTime = 0;
+    winAudio.current.play();
 
-      winAudio.current.currentTime = 0;
-      winAudio.current.play();
+    setGamesWon(oldGamesWon => {
+      const newGamesWon = oldGamesWon + 1;
+      localStorage.setItem("gamesWon", newGamesWon);
+      return newGamesWon;
+    });
 
-      setGamesWon(oldGamesWon => {
-        const newGamesWon = oldGamesWon + 1;
+    setBestScore(oldBestScore => {
+      if (
+        oldBestScore === null ||
+        rollCount < oldBestScore
+      ) {
+        localStorage.setItem("bestScore", rollCount);
+        return rollCount;
+      }
 
-        localStorage.setItem(
-          "gamesWon",
-          newGamesWon
-        );
+      return oldBestScore;
+    });
+  }
+}, [gameWon, rollCount]);
 
-        return newGamesWon;
-      });
-
-
-      setBestScore(oldBestScore => {
-
-        if (
-          oldBestScore === null ||
-          rollCount < oldBestScore
-        ) {
-
-          localStorage.setItem(
-            "bestScore",
-            rollCount
-          );
-
-          return rollCount;
-        }
-
-        return oldBestScore;
-      });
-
-    }
-
-    gameWonBefore.current = gameWon;
-
-  }, [gameWon, rollCount]);
 
 
   // -----------------------------
   // Hold die
   // -----------------------------
 
+  
+  // -----------------------------
+  // Hold die
+  // -----------------------------
+
   const hold = (id) => {
+    if (gameWon || time === 0) return;
 
     setAllNewDice(oldDice =>
       oldDice.map(die =>
         die.id === id
-          ? {
-              ...die,
-              isHeld: !die.isHeld
-            }
+          ? { ...die, isHeld: !die.isHeld }
           : die
       )
     );
-
   };
 
 
@@ -287,43 +276,34 @@ const MainComponent = () => {
   // -----------------------------
 
   const clickButton = () => {
-
-    // NEW GAME
+    // Start a new game after a win or timeout
     if (gameWon || time === 0) {
-
-      const newDice = generateAllNewDice();
+      const newDice = generateAllNewDice(difficulty);
 
       setAllNewDice(newDice);
       setRollCount(0);
       setTime(60);
       setTimerRunning(false);
       setSelectedDie(0);
+      setIsRolling(false);
 
       gameWonBefore.current = false;
 
       setGamesPlayed(oldGamesPlayed => {
-
         const newGamesPlayed = oldGamesPlayed + 1;
-
-        localStorage.setItem(
-          "gamesPlayed",
-          newGamesPlayed
-        );
-
+        localStorage.setItem("gamesPlayed", newGamesPlayed);
         return newGamesPlayed;
       });
 
       return;
     }
 
-
-    // ROLL
+    // Roll the dice
     setTimerRunning(true);
     setIsRolling(true);
 
     rollAudio.current.currentTime = 0;
     rollAudio.current.play();
-
 
     setAllNewDice(oldDice =>
       oldDice.map(die =>
@@ -336,16 +316,11 @@ const MainComponent = () => {
       )
     );
 
-
-    setRollCount(oldRollCount =>
-      oldRollCount + 1
-    );
-
+    setRollCount(oldRollCount => oldRollCount + 1);
 
     setTimeout(() => {
       setIsRolling(false);
     }, 400);
-
   };
 
 
@@ -354,19 +329,16 @@ const MainComponent = () => {
   // -----------------------------
 
   const changeDifficulty = (newDifficulty) => {
-
     setDifficulty(newDifficulty);
 
-    const newDice = generateAllNewDice(
-      newDifficulty
-    );
+    const newDice = generateAllNewDice(newDifficulty);
 
     setAllNewDice(newDice);
-
     setRollCount(0);
     setTime(60);
     setTimerRunning(false);
     setSelectedDie(0);
+    setIsRolling(false);
 
     gameWonBefore.current = false;
   };
@@ -377,7 +349,6 @@ const MainComponent = () => {
   // -----------------------------
 
   const resetStatistics = () => {
-
     localStorage.removeItem("bestScore");
     localStorage.removeItem("gamesPlayed");
     localStorage.removeItem("gamesWon");
@@ -386,11 +357,6 @@ const MainComponent = () => {
     setGamesPlayed(0);
     setGamesWon(0);
   };
-
-
-  // -----------------------------
-  // Keyboard controls
-  // -----------------------------
 
   useEffect(() => {
 
@@ -541,186 +507,93 @@ const MainComponent = () => {
   // Render
   // -----------------------------
 
-  return (
+  
 
-    <main>
+return (
+  <main>
+    <Navbar
+      difficulty={difficulty}
+      onDifficultyChange={changeDifficulty}
+      darkMode={darkMode}
+      onToggleDarkMode={() =>
+        setDarkMode((oldMode) => !oldMode)
+      }
+      bestScore={bestScore}
+      gamesPlayed={gamesPlayed}
+      gamesWon={gamesWon}
+      onResetStatistics={resetStatistics}
+    />
 
-      {gameWon && <Confetti />}
+    {gameWon && <Confetti />}
 
+    <div aria-live="polite" className="sr-only">
+      {gameWon
+        ? "Congratulations! You won the game. Press New Game to play again."
+        : `You have rolled ${rollCount} times.`}
+    </div>
 
+    <div className="card-window">
       <div
-        aria-live="polite"
-        className="sr-only"
+        className={`card-content ${darkMode ? "dark" : ""}`}
       >
+        <h1 className="title">Tenzies</h1>
 
-        {gameWon
-          ? "Congratulations! You won the game. Press New Game to play again."
-          : `You have rolled ${rollCount} times.`
-        }
+        <p className="instructions">
+          Roll until all dice are the same. Click each die
+          to freeze it at its current value between rolls.
+        </p>
 
-      </div>
+        <p className="keyboard-help">
+          Press <strong>R</strong> or{" "}
+          <strong>Space</strong> to roll. Press{" "}
+          <strong>1–9</strong> to hold dice.
+        </p>
 
-
-      <div className="card-window">
-
-        <div
-          className={`card-content ${
-            darkMode ? "dark" : ""
-          }`}
-        >
-
-          <h1 className="title">
-            Tenzies
-          </h1>
-
-
-          <p className="instructions">
-            Roll until all dice are the same.
-            Click each die to freeze it at its
-            current value between rolls.
-          </p>
-
-
-          <p className="keyboard-help">
-            Press <strong>R</strong> or{" "}
-            <strong>Space</strong> to roll.
-            Press <strong>1–9</strong> to hold dice.
-          </p>
-
-
-          <div className="game-info">
-
-            <div>
-              Time: <strong>{time}s</strong>
-            </div>
-
-            <div>
-              Rolls: <strong>{rollCount}</strong>
-            </div>
-
+        <div className="game-info">
+          <div>
+            Time: <strong>{time}s</strong>
           </div>
 
-
-          {gameWon && (
-
-            <div className="win-message">
-
-              <h2>🎉 You Won!</h2>
-
-              <p>
-                You finished in {rollCount} rolls.
-              </p>
-
-            </div>
-
-          )}
-
-
-          {time === 0 && !gameWon && (
-
-            <div className="win-message">
-
-              <h2>😂 You Failed!</h2>
-
-              <p>
-                Time's up! Better luck next time.
-              </p>
-
-            </div>
-
-          )}
-
-
-          <div className="dice-container">
-
-            {diceElements}
-
-
-            <button
-              ref={buttonRef}
-              className="roll-dice"
-              onClick={clickButton}
-              aria-label={
-                gameWon || time === 0
-                  ? "Start a new game"
-                  : "Roll the dice"
-              }
-            >
-
-              {gameWon || time === 0
-                ? "New Game"
-                : "Roll"
-              }
-
-            </button>
-
+          <div>
+            Rolls: <strong>{rollCount}</strong>
           </div>
-
-
-          <BestScore
-            bestScore={bestScore}
-          />
-
-
-          <GameStats
-            gamesPlayed={gamesPlayed}
-            gamesWon={gamesWon}
-          />
-
-
-          <button
-            className="reset-stats"
-            onClick={resetStatistics}
-          >
-            Reset Statistics
-          </button>
-
-
-          <div className="difficulty">
-
-            <button
-              onClick={() => changeDifficulty(6)}
-            >
-              Easy
-            </button>
-
-            <button
-              onClick={() => changeDifficulty(10)}
-            >
-              Normal
-            </button>
-
-            <button
-              onClick={() => changeDifficulty(15)}
-            >
-              Hard
-            </button>
-
-          </div>
-
-
-          <button
-            className="theme-button"
-            onClick={() =>
-              setDarkMode(oldMode => !oldMode)
-            }
-          >
-
-            {darkMode
-              ? "☀️ Light Mode"
-              : "🌙 Dark Mode"
-            }
-
-          </button>
-
-
         </div>
 
+        {gameWon && (
+          <div className="win-message">
+            <h2>🎉 You Won!</h2>
+            <p>You finished in {rollCount} rolls.</p>
+          </div>
+        )}
+
+        {time === 0 && !gameWon && (
+          <div className="win-message">
+            <h2>😂 You Failed!</h2>
+            <p>Time's up! Better luck next time.</p>
+          </div>
+        )}
+
+        <div className="dice-container">
+          {diceElements}
+
+          <button
+            ref={buttonRef}
+            className="roll-dice"
+            onClick={clickButton}
+            aria-label={
+              gameWon || time === 0
+                ? "Start a new game"
+                : "Roll the dice"
+            }
+          >
+            {gameWon || time === 0 ? "New Game" : "Roll"}
+          </button>
+        </div>
       </div>
+    </div>
+  </main>
+);
 
-    </main>
-
-  );
 };
 
 export default MainComponent;
